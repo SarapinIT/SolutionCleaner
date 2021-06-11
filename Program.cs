@@ -46,6 +46,7 @@ namespace SolutionCleaner
                 foreach (var file in notIncludedFiles)
                 {
                     var fileInfo = new FileInfo(file);
+                    // ReSharper disable once PossibleNullReferenceException
                     fileInfo.Directory.Delete(true);
                 }
 
@@ -66,6 +67,7 @@ namespace SolutionCleaner
                     continue;
                 }
 
+                // ReSharper disable once AssignNullToNotNullAttribute
                 var slnFilePath = Directory.GetFiles(input, "*.sln").FirstOrDefault();
 
                 if (slnFilePath == null)
