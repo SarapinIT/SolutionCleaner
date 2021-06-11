@@ -12,8 +12,63 @@ namespace SolutionCleaner
         {
             var (slnDirPath, slnFilePath) = GetValidDirToSln();
             NotIncludedProjCheck(slnDirPath, slnFilePath);
+            EmptyFoldersCheck(slnDirPath);
+
+            Console.WriteLine("all done");
         }
 
+        private static void EmptyFoldersCheck(string slnDirPath)
+        {
+            var topLevelDirectories = Directory.GetDirectories(slnDirPath);
+            var directoriesWithNoFiles = topLevelDirectories.Where(o => false == DirectoryContainFilesRecursively(o)).ToArray();
+
+            if (directoriesWithNoFiles.Length == 0)
+            {
+                Console.WriteLine("no directories with no files");
+                return;
+            }
+
+            Console.WriteLine("directories with no files");
+            foreach (var dir in directoriesWithNoFiles)
+            {
+                Console.WriteLine(dir);
+            }
+
+            Console.WriteLine("delete directories with no files?");
+
+            string response;
+            do
+            {
+                response = Console.ReadLine();
+            } while (response != "yes" && response != "no");
+
+            if (response == "yes")
+            {
+                foreach (var dir in directoriesWithNoFiles)
+                {
+                    Directory.Delete(dir, true);
+                }
+
+                Console.WriteLine("done");
+            }
+        }
+
+        private static bool DirectoryContainFilesRecursively(string path)
+        {
+            var files = Directory.GetFiles(path);
+            if (files.Length > 0)
+                return true;
+            
+            var directories = Directory.GetDirectories(path);
+
+            foreach (var directory in directories)
+            {
+                if (DirectoryContainFilesRecursively(directory)) return true;
+            }
+
+            return false;
+        }
+        
         private static void NotIncludedProjCheck(string slnDirPath, string slnFilePath)
         {
             var solution = SolutionFile.Parse(slnFilePath);
@@ -24,7 +79,7 @@ namespace SolutionCleaner
 
             if (notIncludedFiles.Length == 0)
             {
-                Console.WriteLine("nothing to clean");
+                Console.WriteLine("all csproj files included to solution");
                 return;
             }
 
